@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, version } from "react";
 
 const WORDLE_REGEX =
   /Wordle (?<version>[0-9]+) (?<attempts>[1-6])\/6(\s+)(?<blocks>[\s\S]*)/;
@@ -66,21 +66,16 @@ const formatOrdinals = (n: number) => {
   return `${n}${suffix}`;
 };
 
-function describeRow(row: string, index: number) {
-  const chars = [...row];
-  const blocks = chars.map(getBlockColor).join(" ");
-  const ordinal = formatOrdinals(index + 1);
-  return `The ${ordinal} row has a ${blocks} squares.`;
-}
-
-function process(input: string): { alt: string; blocks: string } | null {
+function process(
+  input: string
+): { alt: string; blocks: string; version: string; attempts: string } | null {
   // @ts-expect-error i know
   globalThis.input = input;
   const match = input.match(WORDLE_REGEX);
   if (!match) {
     return null;
   }
-  const { blocks } = match.groups as {
+  const { blocks, version, attempts } = match.groups as {
     version: string;
     attempts: string;
     blocks: string;
@@ -102,6 +97,8 @@ function process(input: string): { alt: string; blocks: string } | null {
   });
   return {
     blocks,
+    version,
+    attempts,
     alt: `${rows.length} rows of five blocks. ${rowDescriptions.join(" ")}`,
   };
 }
@@ -114,6 +111,8 @@ export default function Index() {
   const results = process(input);
   const alt = results?.alt;
   const blocks = results?.blocks;
+  const version = results?.version;
+  const attempts = results?.attempts;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const CAN_USE_CLIPBOARD_ITEM = typeof ClipboardItem !== "undefined";
 
@@ -137,6 +136,9 @@ export default function Index() {
     }
     canvas.toBlob((blob) => {
       const item = new ClipboardItem({
+        "text/plain": new Blob([`Wordle ${version} ${attempts}/6`], {
+          type: "text/plain",
+        }),
         "image/png": blob!,
       });
       navigator.clipboard.write([item]);
