@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, version } from "react";
+import { useEffect, useRef, useState } from "react";
+import { parseWordleGrid } from "../wordle";
 
 const WORDLE_REGEX =
   /Wordle (?<version>[0-9]+) (?<attempts>[1-6])\/6(\s+)(?<blocks>[\s\S]*)/;
@@ -7,6 +8,7 @@ interface BlockGroup {
   color: string;
   count: number;
 }
+
 
 type BlockRowDescriptor = BlockGroup[];
 
@@ -52,54 +54,15 @@ function getBlockColor(char: string) {
   }
 }
 
-var pr = new Intl.PluralRules("en-US", { type: "ordinal" });
-
-const suffixes = new Map([
-  ["one", "st"],
-  ["two", "nd"],
-  ["few", "rd"],
-  ["other", "th"],
-]);
-const formatOrdinals = (n: number) => {
-  const rule = pr.select(n);
-  const suffix = suffixes.get(rule);
-  return `${n}${suffix}`;
-};
-
-function process(
-  input: string
-): { alt: string; blocks: string; version: string; attempts: string } | null {
-  // @ts-expect-error i know
-  globalThis.input = input;
-  const match = input.match(WORDLE_REGEX);
+function parseWordleString(str: string) {
+  const match = str.match(WORDLE_REGEX);
   if (!match) {
     return null;
   }
-  const { blocks, version, attempts } = match.groups as {
+  return match.groups as {
     version: string;
     attempts: string;
     blocks: string;
-  };
-  const rows = blocks.trim().split("\n");
-  const rowDescriptions = rows.map((row, i) => {
-    const descriptor = getBlockRowDescriptor(row);
-    // All the colors are the same.
-    if (descriptor.length === 1 && descriptor[0].count === 5) {
-      return `The ${formatOrdinals(i + 1)} row is all ${
-        descriptor[0].color
-      } squares.`;
-    }
-    const rows = descriptor.map((block) => {
-      return `${block.count} ${block.color}`;
-    });
-    rows[rows.length - 1] = `and ${rows[rows.length - 1]}`;
-    return `The ${formatOrdinals(i + 1)} row has ${rows.join(", ")} squares.`;
-  });
-  return {
-    blocks,
-    version,
-    attempts,
-    alt: `${rows.length} rows of five blocks. ${rowDescriptions.join(" ")}`,
   };
 }
 
@@ -107,14 +70,15 @@ const CANVAS_FONT_SIZE = 48;
 const CANVAS_LINE_HEIGHT = CANVAS_FONT_SIZE * 1.1;
 
 export default function Index() {
-  const [input, setInput] = useState(``);
-  const results = process(input);
-  const alt = results?.alt;
+  const [input, setInput] = useState('');
+  const results = parseWordleString(input);
   const blocks = results?.blocks;
   const version = results?.version;
   const attempts = results?.attempts;
+  const alt = parseWordleGrid(blocks ?? "");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const CAN_USE_CLIPBOARD_ITEM = typeof ClipboardItem !== "undefined";
+
 
   function getCanvasDimensionsForBlocks(blocks: string): {
     width: number;
@@ -157,18 +121,13 @@ export default function Index() {
       const context = canvas.getContext("2d");
       if (context == null) return;
       const lines = blocks?.trim()?.split("\n") ?? [];
-      const { height } = getCanvasDimensionsForBlocks(blocks ?? "");
-      const blockHeight = CANVAS_LINE_HEIGHT * lines.length;
-      const paddingTop = CANVAS_FONT_SIZE;
-      const paddingBottom = CANVAS_FONT_SIZE;
-      const padding = paddingTop + paddingBottom;
       context.font = `${CANVAS_FONT_SIZE}px serif`;
       context.textAlign = "center";
       context.textBaseline = "top";
       console.log("blocks", blocks);
       for (const [index, line] of lines.entries()) {
         const x = canvas.width / 2;
-        const y = paddingTop + index * CANVAS_LINE_HEIGHT;
+        const y = CANVAS_FONT_SIZE + index * CANVAS_LINE_HEIGHT;
         context.fillText(line, x, y);
       }
     }
