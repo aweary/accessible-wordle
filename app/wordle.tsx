@@ -58,7 +58,7 @@ function formatMessageForGuess(offset: number, guess: WordleGuess) {
   }
   if (hasOutOfPosition) {
     if (hasCorrect) {
-      message += ", and ";
+      message += " and ";
     }
     const allOutOfPosition = guess.out_of_position.length === 5;
     if (allOutOfPosition) {
