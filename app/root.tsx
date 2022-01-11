@@ -15,6 +15,7 @@ export const meta: MetaFunction = () => {
 
 export const links : LinksFunction = () => {
   return [
+    {rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/blue.css'},
     { rel: 'stylesheet', href: styles }
   ]
 }

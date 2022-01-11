@@ -132,22 +132,50 @@ export default function Index() {
     }
   }, [input]);
 
+  const isInvalid = input && results == null;
+
   const { width, height } = getCanvasDimensionsForBlocks(blocks ?? "");
   return (
     <div className="container">
-      <h1>Accessible Wordle Results</h1>
-      <p>
-        Paste in the text from your Wordle game and we'll generate a screenshot
-        and alt text that you can share online. You can right click on the image
-        to save or copy it.
-      </p>
-      <textarea
-        rows={10}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      />
-      {input && (
+      <h1>Accessible Wordle</h1>
+      <div className="content">
+        <div className="intro">
+          <p>
+            Paste in the text from your{" "}
+            <a href="https://www.powerlanguage.co.uk/wordle/">Wordle</a> game
+            and we'll generate a screenshot and alt text that you can share
+            online. You can right click on the image to save or copy it.
+          </p>
+        </div>
+
+        <div className="input-group">
+          <button
+            className="read-button"
+            onClick={async () => {
+              const text = await navigator.clipboard.readText();
+              setInput(text);
+            }}
+          >
+            Read from Clipboard
+          </button>
+          <textarea
+            rows={10}
+            value={input}
+            placeholder="Or paste in your Wordle text here"
+            onChange={(e) => setInput(e.target.value)}
+          />
+
+          {isInvalid && (
+            <span className="error">
+              Unable to parse the provided input as a Wordle grid
+            </span>
+          )}
+        </div>
+      </div>
+
+      {input && !isInvalid && (
         <div>
+          <hr />
           <h2>Results</h2>
           <div className="image-section">
             <canvas ref={canvasRef} width={width} height={height} />
