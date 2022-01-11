@@ -17,11 +17,36 @@ function parseWordleString(str: string) {
   };
 }
 
+const blob = new Blob(["hello"], {
+  type: "text/plain",
+});
+
+async function makeCavasBlob(canvas: HTMLCanvasElement) {
+  return blob;
+}
+
+const text = `Wordle 206 3/6
+
+🟩🟩⬛🟩🟩
+⬛⬛⬛⬛🟨
+🟩🟩🟩🟩🟩`;
+
 const CANVAS_FONT_SIZE = 48;
 const CANVAS_LINE_HEIGHT = CANVAS_FONT_SIZE * 1.1;
 
+let canvasBlob = null;
+
+const makeImagePromise = async (canvas: HTMLCanvasElement) => {
+  // const response = await fetch('https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png');
+  return await new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      resolve(blob);
+    });
+  });
+};
+
 export default function Index() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(text);
   const results = parseWordleString(input);
   const blocks = results?.blocks;
   const version = results?.version;
@@ -29,6 +54,48 @@ export default function Index() {
   const alt = parseWordleGrid(blocks ?? "");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const CAN_USE_CLIPBOARD_ITEM = typeof ClipboardItem !== "undefined";
+
+  canvasRef?.current?.toBlob((blob) => {
+    canvasBlob = blob;
+  });
+
+  function handleImageCopy() {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+    // Safar handles clipboard permissions differently than Chrome. First
+    // try to do it Safari's way.
+    const titleBlob = new Blob([`Wordle ${version} ${attempts}/6`], {
+      type: "text/plain",
+    });
+
+    try {
+      navigator.clipboard.write([
+        new ClipboardItem({
+          "text/plain": Promise.resolve(titleBlob),
+          // @ts-ignore
+          "image/png": makeImagePromise(canvas).catch((err) => {
+            console.error(err);
+          }),
+        }),
+      ]);
+    } catch (err) {
+      try {
+        canvas.toBlob((blob) => {
+          navigator.clipboard.write([
+            new ClipboardItem({
+              "text/plain": titleBlob,
+              "image/png": blob!,
+            }),
+          ]);
+        });
+      } catch (e) {
+        console.error(e);
+        Sentry.captureException(e);
+      }
+    }
+  }
 
   function getCanvasDimensionsForBlocks(blocks: string): {
     width: number;
@@ -41,31 +108,6 @@ export default function Index() {
     const height = CANVAS_FONT_SIZE * lines.length + padding;
     const width = CANVAS_FONT_SIZE * 5 + padding;
     return { width, height };
-  }
-
-  function handleImageCopy() {
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        return;
-      }
-      canvas.toBlob((blob) => {
-        const item = new ClipboardItem({
-          "text/plain": new Blob([`Wordle ${version} ${attempts}/6`], {
-            type: "text/plain",
-          }),
-          "image/png": blob!,
-        });
-        navigator.clipboard.write([item]);
-      });
-    } catch (e) {
-      console.error(e);
-      if (e instanceof Error) {
-        Sentry.captureException(e);
-      } else {
-        Sentry.captureMessage(String(e));
-      }
-    }
   }
 
   function handleTextCopy() {

@@ -112,6 +112,7 @@ function populateGuessForBlock(
     case "🟩":
       return guess.correct.push(offset);
     case "⬜":
+    case "⬛":
       // Do nothing
       return;
     default:
