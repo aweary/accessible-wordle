@@ -23,7 +23,7 @@ export function parseWordleGrid(grid: string) {
   return `
     A grid of blocks with ${
       rows.length
-    } row${s} and five colums of blocks, each row being a guess in a game of Wordle. ${labels.join(
+    } row${s} and five columns of blocks, each row being a guess in a game of Wordle. ${labels.join(
     ". "
   )}.
   `;
@@ -41,11 +41,11 @@ function formatMessageForOutcome(
   if (multiple) {
     ordinals[ordinals.length - 1] = `and ${ordinals[ordinals.length - 1]}`;
   }
-  return `The ${ordinals.join(", ")} letter${s} ${w} ${label}`;
+  return `the ${ordinals.join(", ")} letter${s} ${w} ${label}`;
 }
 
 function formatMessageForGuess(offset: number, guess: WordleGuess) {
-  let message = `In the ${formatOrdinals(offset)} guess `;
+  let message = `In the ${formatOrdinals(offset)} guess, `;
   const hasCorrect = guess.correct.length > 0;
   const hasOutOfPosition = guess.out_of_position.length > 0;
   if (hasCorrect) {
