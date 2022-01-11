@@ -25,12 +25,6 @@ async function makeCavasBlob(canvas: HTMLCanvasElement) {
   return blob;
 }
 
-const text = `Wordle 206 3/6
-
-🟩🟩⬛🟩🟩
-⬛⬛⬛⬛🟨
-🟩🟩🟩🟩🟩`;
-
 const CANVAS_FONT_SIZE = 48;
 const CANVAS_LINE_HEIGHT = CANVAS_FONT_SIZE * 1.1;
 
@@ -46,7 +40,7 @@ const makeImagePromise = async (canvas: HTMLCanvasElement) => {
 };
 
 export default function Index() {
-  const [input, setInput] = useState(text);
+  const [input, setInput] = useState("");
   const results = parseWordleString(input);
   const blocks = results?.blocks;
   const version = results?.version;
@@ -129,7 +123,11 @@ export default function Index() {
       for (const [index, line] of lines.entries()) {
         const x = canvas.width / 2;
         const y = CANVAS_FONT_SIZE + index * CANVAS_LINE_HEIGHT;
-        context.fillText(line, x, y);
+        const spaced_line = [...line].join(
+          // Unicode hair space
+          "\u200a"
+        );
+        context.fillText(spaced_line, x, y);
       }
     }
   }, [input]);
