@@ -1,58 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { parseWordleGrid } from "../wordle";
+import * as Sentry from "@sentry/react";
 
 const WORDLE_REGEX =
   /Wordle (?<version>[0-9]+) (?<attempts>[1-6])\/6(\s+)(?<blocks>[\s\S]*)/;
-
-interface BlockGroup {
-  color: string;
-  count: number;
-}
-
-
-type BlockRowDescriptor = BlockGroup[];
-
-function getBlockRowDescriptor(row: string): BlockRowDescriptor {
-  const chars = [...row];
-  const descriptors = [];
-  let current: BlockGroup | null = null;
-  for (let i = 0; i < chars.length; i++) {
-    const block = chars[i];
-    const color = getBlockColor(block);
-    if (current == null) {
-      current = {
-        color,
-        count: 1,
-      };
-    } else if (current.color === color) {
-      current.count++;
-    } else {
-      descriptors.push(current);
-      current = {
-        color,
-        count: 1,
-      };
-    }
-  }
-  if (current != null) {
-    descriptors.push(current);
-  }
-  return descriptors;
-}
-
-function getBlockColor(char: string) {
-  switch (char) {
-    case "⬜":
-      return "gray";
-    case "🟨":
-      return "yellow";
-    case "🟩":
-      return "green";
-    default:
-      console.trace("oops", char);
-      return "";
-  }
-}
 
 function parseWordleString(str: string) {
   const match = str.match(WORDLE_REGEX);
@@ -70,7 +21,7 @@ const CANVAS_FONT_SIZE = 48;
 const CANVAS_LINE_HEIGHT = CANVAS_FONT_SIZE * 1.1;
 
 export default function Index() {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const results = parseWordleString(input);
   const blocks = results?.blocks;
   const version = results?.version;
@@ -78,7 +29,6 @@ export default function Index() {
   const alt = parseWordleGrid(blocks ?? "");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const CAN_USE_CLIPBOARD_ITEM = typeof ClipboardItem !== "undefined";
-
 
   function getCanvasDimensionsForBlocks(blocks: string): {
     width: number;
@@ -94,19 +44,28 @@ export default function Index() {
   }
 
   function handleImageCopy() {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-    canvas.toBlob((blob) => {
-      const item = new ClipboardItem({
-        "text/plain": new Blob([`Wordle ${version} ${attempts}/6`], {
-          type: "text/plain",
-        }),
-        "image/png": blob!,
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        return;
+      }
+      canvas.toBlob((blob) => {
+        const item = new ClipboardItem({
+          "text/plain": new Blob([`Wordle ${version} ${attempts}/6`], {
+            type: "text/plain",
+          }),
+          "image/png": blob!,
+        });
+        navigator.clipboard.write([item]);
       });
-      navigator.clipboard.write([item]);
-    });
+    } catch (e) {
+      console.error(e);
+      if (e instanceof Error) {
+        Sentry.captureException(e);
+      } else {
+        Sentry.captureMessage(String(e));
+      }
+    }
   }
 
   function handleTextCopy() {

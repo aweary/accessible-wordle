@@ -1,0 +1,72 @@
+Arguments: 
+  /nix/store/90bv6h5rv9a8zbg01gfzz2488w6y2w55-nodejs-14.17.3/bin/node /Users/brandon.dail/.nix-profile/bin/yarn add @sentry/react @sentry/tacing
+
+PATH: 
+  /Users/brandon.dail/.nvm/versions/node/v17.3.0/bin:/Users/brandon.dail/.nvm/versions/node/v17.3.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/brandon.dail/.nvm/versions/node/v17.3.0/bin:/Users/brandon.dail/.cargo/bin:/Users/brandon.dail/.nix-profile/bin
+
+Yarn version: 
+  1.19.2
+
+Node version: 
+  14.17.3
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@sentry%2ftacing: Not found
+      at Request.params.callback [as _callback] (/nix/store/260r9l9gz301mrk3g909lq80q0y96imx-yarn-1.19.2/libexec/yarn/lib/cli.js:66927:18)
+      at Request.self.callback (/nix/store/260r9l9gz301mrk3g909lq80q0y96imx-yarn-1.19.2/libexec/yarn/lib/cli.js:140586:22)
+      at Request.emit (events.js:375:28)
+      at Request.<anonymous> (/nix/store/260r9l9gz301mrk3g909lq80q0y96imx-yarn-1.19.2/libexec/yarn/lib/cli.js:141558:10)
+      at Request.emit (events.js:375:28)
+      at IncomingMessage.<anonymous> (/nix/store/260r9l9gz301mrk3g909lq80q0y96imx-yarn-1.19.2/libexec/yarn/lib/cli.js:141480:12)
+      at Object.onceWrapper (events.js:481:28)
+      at IncomingMessage.emit (events.js:387:35)
+      at endReadableNT (internal/streams/readable.js:1317:12)
+      at processTicksAndRejections (internal/process/task_queues.js:82:21)
+
+npm manifest: 
+  {
+    "private": true,
+    "name": "remix-app-template",
+    "description": "",
+    "license": "",
+    "scripts": {
+      "build": "cross-env NODE_ENV=production remix build",
+      "dev": "cross-env NODE_ENV=development run-p dev:*",
+      "postinstall": "remix setup cloudflare-pages",
+      "dev:remix": "remix watch",
+      "dev:wrangler": "wrangler pages dev ./public --watch ./build",
+      "start": "npm run dev:wrangler"
+    },
+    "dependencies": {
+      "@remix-run/cloudflare-pages": "^1.1.1",
+      "@remix-run/react": "^1.1.1",
+      "react": "^17.0.2",
+      "react-dom": "^17.0.2",
+      "remix": "^1.1.1"
+    },
+    "devDependencies": {
+      "@cloudflare/workers-types": "^3.2.0",
+      "@remix-run/dev": "^1.1.1",
+      "@types/react": "^17.0.24",
+      "@types/react-dom": "^17.0.9",
+      "cross-env": "^7.0.3",
+      "esbuild": "0.13.14",
+      "npm-run-all": "^4.1.5",
+      "typescript": "^4.1.2",
+      "wrangler": "^0.0.0-8ab7d2e"
+    },
+    "engines": {
+      "node": ">=14"
+    },
+    "sideEffects": false,
+    "main": "dist/worker.js"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
