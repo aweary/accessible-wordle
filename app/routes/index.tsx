@@ -3,7 +3,7 @@ import { parseWordleGrid } from "../wordle";
 import * as Sentry from "@sentry/react";
 
 const WORDLE_REGEX =
-  /Wordle (?<version>[0-9]+) (?<attempts>[1-6])\/6(\s+)(?<blocks>[\s\S]*)/;
+  /Wordle (?<version>[0-9]+) (?<attempts>[1-6])\/6\*?(\s+)(?<blocks>[\s\S]*)/;
 
 function parseWordleString(str: string) {
   const match = str.match(WORDLE_REGEX);
