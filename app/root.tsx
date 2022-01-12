@@ -10,7 +10,7 @@ import type { MetaFunction, LinksFunction } from "remix";
 import styles from './styles.css'
 
 export const meta: MetaFunction = () => {
-  return { title: "New Remix App" };
+  return { title: "Accessible Wordle" };
 };
 
 export const links : LinksFunction = () => {
